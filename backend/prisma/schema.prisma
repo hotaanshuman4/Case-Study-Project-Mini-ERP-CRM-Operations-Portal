@@ -1,0 +1,145 @@
+// Prisma schema for local development (SQLite - 0 setup required)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ─────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("SALES")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  customers      Customer[]
+  followUps      CustomerFollowUp[]
+  stockMovements StockMovement[]
+  challans       Challan[]
+
+  @@map("users")
+}
+
+model Customer {
+  id           String             @id @default(uuid())
+  name         String
+  mobile       String
+  email        String?
+  businessName String
+  gstNumber    String?
+  customerType String             @default("RETAIL")
+  address      String
+  status       String             @default("LEAD")
+  followUpDate DateTime?
+  notes        String?
+  createdBy    String
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  // Relations
+  creator   User               @relation(fields: [createdBy], references: [id])
+  followUps CustomerFollowUp[]
+  challans  Challan[]
+
+  @@map("customers")
+}
+
+model CustomerFollowUp {
+  id         String   @id @default(uuid())
+  customerId String
+  note       String
+  createdBy  String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  creator  User     @relation(fields: [createdBy], references: [id])
+
+  @@map("customer_follow_ups")
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  name          String
+  sku           String   @unique
+  category      String
+  unitPrice     Decimal
+  currentStock  Int      @default(0)
+  minStockAlert Int      @default(10)
+  location      String?
+  imageUrl      String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  stockMovements StockMovement[]
+  challanItems   ChallanItem[]
+
+  @@map("products")
+}
+
+model StockMovement {
+  id              String   @id @default(uuid())
+  productId       String
+  quantityChanged Int
+  movementType    String
+  reason          String
+  createdBy       String
+  createdAt       DateTime @default(now())
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id])
+  creator User    @relation(fields: [createdBy], references: [id])
+
+  @@map("stock_movements")
+}
+
+model Challan {
+  id               String        @id @default(uuid())
+  challanNumber    String        @unique
+  customerId       String
+  customerSnapshot String        // Stored as JSON string
+  status           String        @default("DRAFT")
+  totalQuantity    Int           @default(0)
+  totalAmount      Decimal       @default(0)
+  notes            String?
+  createdBy        String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  // Relations
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  creator      User          @relation(fields: [createdBy], references: [id])
+  challanItems ChallanItem[]
+
+  @@map("challans")
+}
+
+model ChallanItem {
+  id              String  @id @default(uuid())
+  challanId       String
+  productId       String
+  productSnapshot String  // Stored as JSON string
+  quantity        Int
+  unitPrice       Decimal
+  totalPrice      Decimal
+
+  // Relations
+  challan  Challan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+  product  Product @relation(fields: [productId], references: [id])
+
+  @@map("challan_items")
+}

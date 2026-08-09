@@ -1,0 +1,120 @@
+{
+  "info": {
+    "_postman_id": "erp-crm-portal-collection",
+    "name": "ERP/CRM Portal API",
+    "description": "Complete API collection for the Mini ERP + CRM Operations Portal",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000/api/v1", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) { var res = pm.response.json(); pm.collectionVariables.set('token', res.data.token); pm.test('Login successful', () => pm.expect(res.success).to.be.true); }"], "type": "text/javascript" } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@erp.com\",\n  \"password\": \"Admin@123\"\n}" }, "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] } }
+        },
+        {
+          "name": "Get Me",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] } }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "List Customers",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/customers?page=1&limit=10&search=sharma", "host": ["{{base_url}}"], "path": ["customers"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "search", "value": "sharma" }] } }
+        },
+        {
+          "name": "Create Customer",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Customer\",\n  \"mobile\": \"9999999999\",\n  \"businessName\": \"Test Corp\",\n  \"address\": \"123 Test Street, Mumbai\",\n  \"customerType\": \"RETAIL\",\n  \"status\": \"ACTIVE\",\n  \"email\": \"test@testcorp.com\"\n}" }, "url": { "raw": "{{base_url}}/customers", "host": ["{{base_url}}"], "path": ["customers"] } }
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/customers/cust-001", "host": ["{{base_url}}"], "path": ["customers", "cust-001"] } }
+        },
+        {
+          "name": "Add Follow-up Note",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"note\": \"Follow-up call done. Customer interested in bulk order.\"\n}" }, "url": { "raw": "{{base_url}}/customers/cust-001/followups", "host": ["{{base_url}}"], "path": ["customers", "cust-001", "followups"] } }
+        },
+        {
+          "name": "Customer Stats",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/customers/stats", "host": ["{{base_url}}"], "path": ["customers", "stats"] } }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/products?page=1&limit=10", "host": ["{{base_url}}"], "path": ["products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] } }
+        },
+        {
+          "name": "List Low Stock Products",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/products?lowStock=true", "host": ["{{base_url}}"], "path": ["products"], "query": [{ "key": "lowStock", "value": "true" }] } }
+        },
+        {
+          "name": "Create Product",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Widget 500ml\",\n  \"sku\": \"TEST-W-001\",\n  \"category\": \"Widgets\",\n  \"unitPrice\": 299.99,\n  \"currentStock\": 100,\n  \"minStockAlert\": 20,\n  \"location\": \"Warehouse A - Shelf 1\"\n}" }, "url": { "raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"] } }
+        },
+        {
+          "name": "Add Stock IN",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"quantity\": 50,\n  \"reason\": \"Purchase order #PO-2024-001\"\n}" }, "url": { "raw": "{{base_url}}/products/:productId/stock-in", "host": ["{{base_url}}"], "path": ["products", ":productId", "stock-in"], "variable": [{ "key": "productId", "value": "PRODUCT_ID_HERE" }] } }
+        },
+        {
+          "name": "Get Stock Movements",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/products/:productId/stock-movements", "host": ["{{base_url}}"], "path": ["products", ":productId", "stock-movements"], "variable": [{ "key": "productId", "value": "PRODUCT_ID_HERE" }] } }
+        }
+      ]
+    },
+    {
+      "name": "Challans",
+      "item": [
+        {
+          "name": "List Challans",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/challans?page=1&limit=10", "host": ["{{base_url}}"], "path": ["challans"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] } }
+        },
+        {
+          "name": "Create Draft Challan",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"customerId\": \"cust-001\",\n  \"items\": [\n    { \"productId\": \"PRODUCT_ID_1\", \"quantity\": 10 },\n    { \"productId\": \"PRODUCT_ID_2\", \"quantity\": 5 }\n  ],\n  \"notes\": \"Delivery to warehouse on Monday\",\n  \"status\": \"DRAFT\"\n}" }, "url": { "raw": "{{base_url}}/challans", "host": ["{{base_url}}"], "path": ["challans"] } }
+        },
+        {
+          "name": "Create Confirmed Challan",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"customerId\": \"cust-001\",\n  \"items\": [\n    { \"productId\": \"PRODUCT_ID_1\", \"quantity\": 5 }\n  ],\n  \"status\": \"CONFIRMED\"\n}" }, "url": { "raw": "{{base_url}}/challans", "host": ["{{base_url}}"], "path": ["challans"] } }
+        },
+        {
+          "name": "Confirm Challan",
+          "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/challans/:challanId/confirm", "host": ["{{base_url}}"], "path": ["challans", ":challanId", "confirm"], "variable": [{ "key": "challanId", "value": "CHALLAN_ID_HERE" }] } }
+        },
+        {
+          "name": "Cancel Challan",
+          "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/challans/:challanId/cancel", "host": ["{{base_url}}"], "path": ["challans", ":challanId", "cancel"], "variable": [{ "key": "challanId", "value": "CHALLAN_ID_HERE" }] } }
+        },
+        {
+          "name": "Challan Stats",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/challans/stats", "host": ["{{base_url}}"], "path": ["challans", "stats"] } }
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "item": [
+        {
+          "name": "List Users",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] } }
+        },
+        {
+          "name": "Create User",
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"New Sales Person\",\n  \"email\": \"newsales@erp.com\",\n  \"password\": \"NewPass@123\",\n  \"role\": \"SALES\"\n}" }, "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] } }
+        }
+      ]
+    }
+  ]
+}
